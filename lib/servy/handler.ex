@@ -4,6 +4,7 @@ defmodule Servy.Handler do
 """
 
 alias Servy.Conv
+alias Servy.BearController
 
 @pages_path Path.expand("pages", File.cwd!)
 
@@ -29,23 +30,24 @@ import Servy.FileHandler, only: [handle_file: 2]
   # end
 
   def route(%Conv{method: "GET", path: "/wildthings"} = conv) do
-    %{conv | status: 200, resp_body: "Bears, Lions, Tigers"}
+    %{ conv | status: 200, resp_body: "Bears, Lions, Tigers" }
   end
 
   def route(%Conv{method: "GET", path: "/bears"} = conv) do
-    %{conv | status: 200, resp_body: "Teddyursa, Tibbers, Bear"}
+    BearController.index(conv)
   end
 
   def route(%Conv{method: "GET", path: "/bears" <> id} = conv) do
-    %{conv | status: 200, resp_body: "Bear #{id}"}
+    params = Map.put(conv.params, "id", id)
+    BearController.show(conv, params)
   end
 
   def route(%Conv{method: "DELETE", path: "/bears" <> _id} = conv) do
-    %{conv | status: 403, resp_body: "Deleting a bear is forbidden."}
+    %{ conv | status: 403, resp_body: "Deleting a bear is forbidden." }
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
-    %{ conv | status: 201, resp_body: "The bear #{conv.params["name"]} of type #{conv.params["type"]} has been created." }
+    BearController.create(conv, conv.params)
   end
 
   def route(%Conv{method: "GET", path: "/index"} = conv) do
@@ -70,7 +72,7 @@ import Servy.FileHandler, only: [handle_file: 2]
   end
 
   def route(%Conv{path: path} = conv) do
-    %{conv | status: 404, resp_body: "Path #{path} does not exist."}
+    %{ conv | status: 404, resp_body: "Path #{path} does not exist." }
   end
 
   def format_response(%Conv{} = conv) do
