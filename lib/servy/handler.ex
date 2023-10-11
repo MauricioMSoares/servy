@@ -44,6 +44,10 @@ import Servy.FileHandler, only: [handle_file: 2]
     %{conv | status: 403, resp_body: "Deleting a bear is forbidden."}
   end
 
+  def route(%Conv{method: "POST", path: "/bears"} = conv) do
+    %{ conv | status: 201, resp_body: "The bear #{conv.params["name"]} of type #{conv.params["type"]} has been created." }
+  end
+
   def route(%Conv{method: "GET", path: "/index"} = conv) do
     @pages_path
     |> Path.join("index.html")
@@ -110,6 +114,17 @@ Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
 
+"""
+
+request = """
+POST /bears HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
+
+name=Tibbers&type=Entity
 """
 
 response = Servy.Handler.handle(request)
