@@ -17,6 +17,12 @@ defmodule Recurse do
   defp triple([], current_list) do
     current_list |> Enum.reverse()
   end
+
+  def my_map([head | tail], fun) do
+    [fun.(head) | my_map(tail, fun)]
+  end
+
+  def my_map([], _fun), do: []
 end
 
 # Recurse.sum([1, 2, 3, 4, 5], 0)
