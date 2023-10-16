@@ -1,5 +1,5 @@
 defmodule HandlerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import Servy.Handler, only: [handle: 1]
 
@@ -15,12 +15,12 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-    HTTP/1.1 200 OK\r
-    Content-Type: text/html\r
-    Content-Length: 20\r
-    \r
-    Bears, Lions, Tigers
-    """
+           HTTP/1.1 200 OK\r
+           Content-Type: text/html\r
+           Content-Length: 20\r
+           \r
+           Bears, Lions, Tigers
+           """
   end
 
   test "GET /bears" do
@@ -40,7 +40,7 @@ defmodule HandlerTest do
     Content-Length: 191\r
     \r
     <h1>All the Bears!</h1>
-    
+
     <ul>
       <li>Freddy - Mecha</li>
       <li>Snow - Polar</li>
@@ -64,12 +64,12 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-    HTTP/1.1 404 Not Found\r
-    Content-Type: text/html\r
-    Content-Length: 17\r
-    \r
-    No /bigfoot here!
-    """
+           HTTP/1.1 404 Not Found\r
+           Content-Type: text/html\r
+           Content-Length: 17\r
+           \r
+           No /bigfoot here!
+           """
   end
 
   test "GET /bears/1" do
@@ -109,12 +109,12 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-    HTTP/1.1 200 OK\r
-    Content-Type: text/html\r
-    Content-Length: 20\r
-    \r
-    Bears, Lions, Tigers
-    """
+           HTTP/1.1 200 OK\r
+           Content-Type: text/html\r
+           Content-Length: 20\r
+           \r
+           Bears, Lions, Tigers
+           """
   end
 
   test "GET /index" do
@@ -158,15 +158,60 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-    HTTP/1.1 201 Created\r
-    Content-Type: text/html\r
-    Content-Length: 49\r
+           HTTP/1.1 201 Created\r
+           Content-Type: text/html\r
+           Content-Length: 49\r
+           \r
+           The bear Tibbers of type Entity has been created.
+           """
+  end
+
+  test "DELETE /bears" do
+    request = """
+    DELETE /bears/1 HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
     \r
-    The bear Tibbers of type Entity has been created.
     """
+
+    response = handle(request)
+
+    assert response == """
+           HTTP/1.1 403 Forbidden\r
+           Content-Type: text/html\r
+           Content-Length: 29\r
+           \r
+           Deleting a bear is forbidden.
+           """
+  end
+
+  test "GET /api/bears" do
+    request = """
+    GET /api/bears HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+  
+    response = handle(request)
+  
+    expected_response = """
+    HTTP/1.1 200 OK\r
+    Content-Type: application/json\r
+    Content-Length: 242\r
+    \r
+    [{"type":"Entity","name":"Tibbers","id":1,"hibernating":false},
+     {"type":"Mecha","name":"Freddy","id":2,"hibernating":false},
+     {"type":"Polar","name":"Snow","id":3,"hibernating":true},
+     {"type":"Entity","name":"Volibear","id":4,"hibernating":true}]
+    """
+  
+    assert remove_whitespace(response) == remove_whitespace(expected_response)
   end
 
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")
-  end 
+  end
 end

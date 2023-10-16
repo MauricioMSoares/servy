@@ -9,6 +9,7 @@ defmodule Servy.Handler do
 
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
   import Servy.Parser, only: [parse: 1]
+  import Servy.Api.BearController, only: [put_content_length: 1]
 
   @doc "Transforms the request into a response."
   def handle(request) do
@@ -18,11 +19,16 @@ defmodule Servy.Handler do
     |> log 
     |> route 
     |> track
+    |> put_content_length
     |> format_response
   end
 
   def route(%Conv{ method: "GET", path: "/wildthings" } = conv) do
     %{ conv | status: 200, resp_body: "Bears, Lions, Tigers" }          
+  end
+
+  def route(%Conv{ method: "GET", path: "/api/bears" } = conv) do
+    Servy.Api.BearController.index(conv)
   end
 
   def route(%Conv{ method: "GET", path: "/bears" } = conv) do
@@ -32,6 +38,10 @@ defmodule Servy.Handler do
   def route(%Conv{ method: "GET", path: "/bears/" <> id } = conv) do
     params = Map.put(conv.params, "id", id)
     BearController.show(conv, params)
+  end
+
+  def route(%Conv{method: "DELETE", path: "/bears/" <> _id} = conv) do
+    BearController.delete(conv, conv.params)
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
@@ -64,8 +74,8 @@ defmodule Servy.Handler do
   def format_response(%Conv{} = conv) do
     """
     HTTP/1.1 #{Conv.full_status(conv)}\r
-    Content-Type: text/html\r
-    Content-Length: #{String.length(conv.resp_body)}\r
+    Content-Type: #{conv.resp_headers["Content-Type"]}\r
+    Content-Length: #{conv.resp_headers["Content-Length"]}\r
     \r
     #{conv.resp_body}
     """
