@@ -18,4 +18,8 @@ defmodule Servy.Api.BearController do
         headers = Map.put(conv.resp_headers, "Content-Length", String.length(conv.resp_body))
         %{ conv | resp_headers: headers }
     end
+
+    def create(conv, %{"name" => name, "type" => type}) do
+        %{ conv | status: 201, resp_body: "The bear #{name} of type #{type} has been created."}
+    end
 end

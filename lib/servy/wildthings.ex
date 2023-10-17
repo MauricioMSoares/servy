@@ -2,21 +2,31 @@ defmodule Servy.Wildthings do
   alias Servy.Bear
 
   def list_bears do
-    [
-      %Bear{id: 1, name: "Tibbers", type: "Entity"},
-      %Bear{id: 2, name: "Freddy", type: "Mecha"},
-      %Bear{id: 3, name: "Snow", type: "Polar", hibernating: true},
-      %Bear{id: 4, name: "Volibear", type: "Entity", hibernating: true}
-    ]
+    Path.expand("../../db", __DIR__)
+    |> Path.join("bears.json")
+    |> read_json
+    |> Poison.decode!(as: %{"bears" => [%Bear{}]})
+    |> Map.get("bears")
+  end
+
+  defp read_json(source) do
+    case File.read(source) do
+      {:ok, contents} ->
+        contents
+
+      {:error, reason} ->
+        IO.inspect("Error reading #{source}: #{reason}")
+        "[]"
+    end
   end
 
   def get_bear(id) when is_integer(id) do
-    Enum.find(list_bears(), fn(bear) -> bear.id == id end)
+    Enum.find(list_bears(), fn bear -> bear.id == id end)
   end
 
   def get_bear(id) when is_binary(id) do
     id
-    |> String.to_integer
+    |> String.to_integer()
     |> get_bear
   end
 end
