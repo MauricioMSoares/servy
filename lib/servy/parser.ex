@@ -34,18 +34,14 @@ defmodule Servy.Parser do
   into a map with corresponding keys and values.
 
   ## Examples
-      iex> params_string = "name=Tibbers&type=Entity"
+      iex> params_string = "name=Baloo&type=Brown"
       iex> Servy.Parser.parse_params("application/x-www-form-urlencoded", params_string)
-      %{"name" => "Tibbers", "type" => "Entity"}
+      %{"name" => "Baloo", "type" => "Brown"}
       iex> Servy.Parser.parse_params("multipart/form-data", params_string)
       %{}
   """
   def parse_params("application/x-www-form-urlencoded", params_string) do
     params_string |> String.trim |> URI.decode_query
-  end
-
-  def parse_params("application/json", params_string) do
-    Poison.Parser.parse!(params_string, %{})
   end
 
   def parse_params(_, _), do: %{}

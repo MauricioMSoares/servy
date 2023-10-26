@@ -1,5 +1,5 @@
 defmodule HandlerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   import Servy.Handler, only: [handle: 1]
 
@@ -15,12 +15,12 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-           HTTP/1.1 200 OK\r
-           Content-Type: text/html\r
-           Content-Length: 20\r
-           \r
-           Bears, Lions, Tigers
-           """
+    HTTP/1.1 200 OK\r
+    Content-Type: text/html\r
+    Content-Length: 20\r
+    \r
+    Bears, Lions, Tigers
+    """
   end
 
   test "GET /bears" do
@@ -37,15 +37,21 @@ defmodule HandlerTest do
     expected_response = """
     HTTP/1.1 200 OK\r
     Content-Type: text/html\r
-    Content-Length: 191\r
+    Content-Length: 356\r
     \r
-    <h1>All the Bears!</h1>
-
+    <h1>All The Bears!</h1>
+    
     <ul>
-      <li>Freddy - Mecha</li>
+      <li>Brutus - Grizzly</li>
+      <li>Iceman - Polar</li>
+      <li>Kenai - Grizzly</li>
+      <li>Paddington - Brown</li>
+      <li>Roscoe - Panda</li>
+      <li>Rosie - Black</li>
+      <li>Scarface - Grizzly</li>
+      <li>Smokey - Black</li>
       <li>Snow - Polar</li>
-      <li>Tibbers - Entity</li>
-      <li>Volibear - Entity</li>
+      <li>Teddy - Brown</li>
     </ul>
     """
 
@@ -64,12 +70,12 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-           HTTP/1.1 404 Not Found\r
-           Content-Type: text/html\r
-           Content-Length: 17\r
-           \r
-           No /bigfoot here!
-           """
+    HTTP/1.1 404 Not Found\r
+    Content-Type: text/html\r
+    Content-Length: 17\r
+    \r
+    No /bigfoot here!
+    """
   end
 
   test "GET /bears/1" do
@@ -90,7 +96,7 @@ defmodule HandlerTest do
     \r
     <h1>Show Bear</h1>
     <p>
-    Is Tibbers hibernating? <strong>false</strong>
+    Is Teddy hibernating? <strong>true</strong>
     </p>
     """
 
@@ -109,17 +115,17 @@ defmodule HandlerTest do
     response = handle(request)
 
     assert response == """
-           HTTP/1.1 200 OK\r
-           Content-Type: text/html\r
-           Content-Length: 20\r
-           \r
-           Bears, Lions, Tigers
-           """
+    HTTP/1.1 200 OK\r
+    Content-Type: text/html\r
+    Content-Length: 20\r
+    \r
+    Bears, Lions, Tigers
+    """
   end
 
-  test "GET /index" do
+  test "GET /about" do
     request = """
-    GET /index HTTP/1.1\r
+    GET /about HTTP/1.1\r
     Host: example.com\r
     User-Agent: ExampleBrowser/1.0\r
     Accept: */*\r
@@ -131,7 +137,7 @@ defmodule HandlerTest do
     expected_response = """
     HTTP/1.1 200 OK\r
     Content-Type: text/html\r
-    Content-Length: 105\r
+    Content-Length: 102\r
     \r
     <h1>Clark's Wildthings Refuge</h1>
 
@@ -152,38 +158,18 @@ defmodule HandlerTest do
     Content-Type: application/x-www-form-urlencoded\r
     Content-Length: 21\r
     \r
-    name=Tibbers&type=Entity
+    name=Baloo&type=Brown
     """
 
     response = handle(request)
 
     assert response == """
-           HTTP/1.1 201 Created\r
-           Content-Type: text/html\r
-           Content-Length: 49\r
-           \r
-           The bear Tibbers of type Entity has been created.
-           """
-  end
-
-  test "DELETE /bears" do
-    request = """
-    DELETE /bears/1 HTTP/1.1\r
-    Host: example.com\r
-    User-Agent: ExampleBrowser/1.0\r
-    Accept: */*\r
+    HTTP/1.1 201 Created\r
+    Content-Type: text/html\r
+    Content-Length: 33\r
     \r
+    Created a Brown bear named Baloo!
     """
-
-    response = handle(request)
-
-    assert response == """
-           HTTP/1.1 403 Forbidden\r
-           Content-Type: text/html\r
-           Content-Length: 29\r
-           \r
-           Deleting a bear is forbidden.
-           """
   end
 
   test "GET /api/bears" do
@@ -194,47 +180,31 @@ defmodule HandlerTest do
     Accept: */*\r
     \r
     """
-  
+
     response = handle(request)
-  
+
     expected_response = """
     HTTP/1.1 200 OK\r
     Content-Type: application/json\r
-    Content-Length: 242\r
+    Content-Length: 605\r
     \r
-    [{"type":"Entity","name":"Tibbers","id":1,"hibernating":false},
-     {"type":"Mecha","name":"Freddy","id":2,"hibernating":false},
-     {"type":"Polar","name":"Snow","id":3,"hibernating":true},
-     {"type":"Entity","name":"Volibear","id":4,"hibernating":true}]
+    [{"type":"Brown","name":"Teddy","id":1,"hibernating":true},
+     {"type":"Black","name":"Smokey","id":2,"hibernating":false},
+     {"type":"Brown","name":"Paddington","id":3,"hibernating":false},
+     {"type":"Grizzly","name":"Scarface","id":4,"hibernating":true},
+     {"type":"Polar","name":"Snow","id":5,"hibernating":false},
+     {"type":"Grizzly","name":"Brutus","id":6,"hibernating":false},
+     {"type":"Black","name":"Rosie","id":7,"hibernating":true},
+     {"type":"Panda","name":"Roscoe","id":8,"hibernating":false},
+     {"type":"Polar","name":"Iceman","id":9,"hibernating":true},
+     {"type":"Grizzly","name":"Kenai","id":10,"hibernating":false}]
     """
-  
+
     assert remove_whitespace(response) == remove_whitespace(expected_response)
   end
 
-  test "POST /api/bears" do
-    request = """
-    POST /api/bears HTTP/1.1\r
-    Host: example.com\r
-    User-Agent: ExampleBrowser/1.0\r
-    Accept: */*\r
-    Content-Type: application/json\r
-    Content-Length: 22\r
-    \r
-    {"name": "Tibbers", "type": "Entity"}
-    """
-  
-    response = handle(request)
-  
-    assert response == """
-    HTTP/1.1 201 Created\r
-    Content-Type: text/html\r
-    Content-Length: 49\r
-    \r
-    The bear Tibbers of type Entity has been created.
-    """
-  end
 
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")
-  end
+  end 
 end
